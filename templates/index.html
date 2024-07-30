@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сессии</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .indicator-green {
+            background-color: green;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 50%;
+        }
+        .indicator-red {
+            background-color: red;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 50%;
+        }
+        .indicator-black {
+            background-color: black;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Сессии</h1>
+	<a href="/machines" class="btn btn-primary mb-4">К машинам</a>
+        <table id="session-table" class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Индикатор</th>
+                    <th scope="col">ID машины</th>
+                    <th scope="col">Зарядка</th>
+                    <th scope="col">Статус</th>
+                    <th scope="col">Юзер</th>
+                    <th scope="col">Дата начала</th>
+                    <th scope="col">Дата конца</th>
+                    <th scope="col">Действия</th>
+                </tr>
+            </thead>
+            <tbody id="session-body">
+                <!-- Данные будут загружены здесь -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Информация о пользователе</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Имя:</strong> <span id="modalUserName"></span></p>
+                    <p><strong>Телефон:</strong> <span id="modalUserPhone"></span></p>
+                    <p><strong>Должность:</strong> <span id="modalUserJob"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Подключение jQuery, Popper.js и Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function updateSessionData() {
+            $.ajax({
+                url: '/get_session_data',
+                type: 'GET',
+                success: function(response) {
+                    var sessionTableBody = $('#session-body');
+                    sessionTableBody.empty();
+                    response.sessions.forEach(function(session) {
+                        var stateIndicator;
+                        switch (session.state) {
+                            case 0:
+                                stateIndicator = '<span class="indicator-red"></span>';
+                                break;
+                            case 1:
+                                stateIndicator = '<span class="indicator-green"></span>';
+                                break;
+                            default:
+                                stateIndicator = '<span class="indicator-black"></span>';
+                        }
+
+                        var statusText;
+                        switch (session.state) {
+                            case 0:
+                                statusText = 'active';
+                                break;
+                            case 1:
+                                statusText = 'paused';
+                                break;
+                            case 2:
+                                statusText = 'finished';
+                                break;
+                        }
+
+                        var actions = '';
+                        if (session.state === 0) {
+                            actions = '<button class="btn btn-warning pause-btn" onclick="pauseSession(\'' + session.machine_id + '\')">Пауза</button>' +
+                                      '<button class="btn btn-danger stop-btn" onclick="stopSession(\'' + session.machine_id + '\')">Стоп</button>';
+                        }
+
+                        sessionTableBody.append(`
+                            <tr>
+                                <td>${stateIndicator}</td>
+                                <td>${session.machine_id}</td>
+                                <td>${session.voltage}</td>
+                                <td>${statusText}</td>
+                                <td>
+                                    <a href="#" class="user-link" data-toggle="modal" data-target="#userModal"
+                                       data-name="${session.name}"
+                                       data-phone="${session.phoneNumber}"
+                                       data-job="${session.jobPosition}">
+                                        ${session.name}
+                                    </a>
+                                </td>
+                                <td>${session.datetimeStart}</td>
+                                <td>${session.datetimeFinish}</td>
+                                <td>${actions}</td>
+                            </tr>
+                        `);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+
+        function pauseSession(machineId) {
+            sendSessionAction('/pause_machine', machineId);
+        }
+
+        function stopSession(machineId) {
+            sendSessionAction('/stop_machine', machineId);
+        }
+
+        function sendSessionAction(url, machineId) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ machine_id: machineId }),
+                success: function(response) {
+                    updateSessionData();
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            updateSessionData();
+            setInterval(updateSessionData, 3000); // Обновление каждые 3 секунды
+
+            $(document).on('click', '.user-link', function() {
+                var name = $(this).data('name');
+                var phone = $(this).data('phone');
+                var job = $(this).data('job');
+                
+                $('#modalUserName').text(name);
+                $('#modalUserPhone').text(phone);
+                $('#modalUserJob').text(job);
+            });
+        });
+    </script>
+</body>
+</html>

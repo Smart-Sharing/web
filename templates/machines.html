@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Машины</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Машины</h1>
+	<a href="/" class="btn btn-primary mb-4">К сессиям</a>
+        <table id="machine-table" class="table table-striped table-bordered">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Состояние</th>
+                    <th scope="col">Зарядка</th>
+                    <th scope="col">Пользователь</th>
+                    <th scope="col">Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Данные будут загружаться динамически -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Подключение jQuery и Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function updateMachineData() {
+            $.ajax({
+                url: '/get_machine_data',
+                type: 'GET',
+                success: function(response) {
+                    if (response.error) {
+                        alert('Ошибка: ' + response.error);
+                        return;
+                    }
+                    var machineTableBody = $('#machine-table tbody');
+                    machineTableBody.empty();
+                    response.machines.forEach(function(machine) {
+                        var row = '<tr>' +
+                            '<td>' + machine.id + '</td>' +
+                            '<td>' + (machine.state == 0 ? 'active' : (machine.state == 1 ? 'paused' : 'finished')) + '</td>' +
+                            '<td>' + machine.voltage + '</td>' +
+                            '<td>' + (machine.user ? machine.user : '') + '</td>' +
+                            '<td>' +
+                                '<button class="btn btn-success" onclick="startMachine(\'' + machine.id + '\')">Старт</button>' +
+                                 
+                                '<button class="btn btn-danger" onclick="stopMachine(\'' + machine.id + '\')">Стоп</button>' +
+                            '</td>' +
+                            '</tr>';
+                        machineTableBody.append(row);
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+
+        function startMachine(machineId) {
+            sendMachineAction('/unlock_machine', machineId);
+        }
+
+        function pauseMachine(machineId) {
+            sendMachineAction('/pause_machine', machineId);
+        }
+
+        function stopMachine(machineId) {
+            sendMachineAction('/stop_machine', machineId);
+        }
+
+        function sendMachineAction(url, machineId) {
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ machine_id: machineId }),
+                success: function(response) {
+                    alert('Действие выполнено успешно');
+                    updateMachineData();
+                },
+                           });
+        }
+
+        $(document).ready(function() {
+            updateMachineData();
+            setInterval(updateMachineData, 3000); 
+        });
+    </script>
+</body>
+</html>
