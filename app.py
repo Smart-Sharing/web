@@ -73,7 +73,7 @@ def login():
     if request.method == 'POST':
         phone_number = request.form['phoneNumber']
         password = request.form['password']
-        response = requests.post("http://91.236.197.212:8080/login", json={
+        response = requests.post("http://localhost:8080/login", json={
             'phone_number': phone_number,
             'password': password
         })
@@ -86,6 +86,8 @@ def login():
             print("Это токен", response.json().get('token'))
             return render_template('login.html', error='Invalid credentials')
     return render_template('login.html')
+
+
 def get_token():
     return request.cookies.get('token')
 
