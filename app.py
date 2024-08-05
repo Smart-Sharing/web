@@ -73,7 +73,7 @@ def login():
     if request.method == 'POST':
         phone_number = request.form['phoneNumber']
         password = request.form['password']
-        response = requests.post("http://localhost:8080/login", json={
+        response = requests.post("http://host.docker.internal:8080/login", json={
             'phone_number': phone_number,
             'password': password
         })

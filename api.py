@@ -3,7 +3,7 @@ import json
 
 
 def get_all_users(token):
-    url = "http://localhost:8080/get_all_users"
+    url = "http://host.docker.internal:8080/get_all_users"
 
     headers = {'Authorization': f'Bearer {token}'}
     response = requests.get(url, headers=headers)
@@ -14,7 +14,7 @@ def get_all_users(token):
 
 
 def get_all_machines(token):
-    url = "http://localhost:8080/get_all_machines"
+    url = "http://host.docker.internal:8080/get_all_machines"
     headers = {'Authorization': f'Bearer {token}'}
     response = requests.get(url, headers=headers)
     print(response)
@@ -22,7 +22,7 @@ def get_all_machines(token):
     return json_response
 
 def get_all_sessions(token):
-    url = "http://localhost:8080/get_all_sessions"
+    url = "http://host.docker.internal:8080/get_all_sessions"
     headers = {'Authorization': f'Bearer {token}'}
     response = requests.get(url, headers=headers)
     print(response)
@@ -30,7 +30,7 @@ def get_all_sessions(token):
     return json_response
 
 def get_user(user_id, token):
-    url = "http://localhost:8080/get_user?user_id={}".format(user_id)
+    url = "http://host.docker.internal:8080/get_user?user_id={}".format(user_id)
     headers = {'Authorization': f'Bearer {token}'}
 
     response = requests.get(url, headers=headers)
@@ -38,7 +38,7 @@ def get_user(user_id, token):
     return json_response
 
 def get_machine(token, machine_id):
-    url = "http://localhost:8080/get_machine?machine_id={}".format(machine_id)
+    url = "http://host.docker.internal:8080/get_machine?machine_id={}".format(machine_id)
     headers = {'Authorization': f'Bearer {token}'}
 
     response = requests.get(url, headers=headers)
@@ -47,7 +47,7 @@ def get_machine(token, machine_id):
 
 
 def pause_machine(token, machine_id):
-    url = 'http://localhost:8080/pause_machine'
+    url = 'http://host.docker.internal:8080/pause_machine'
     headers = {
         'Authorization': f'Bearer {token}',
     }
@@ -59,7 +59,7 @@ def pause_machine(token, machine_id):
     return response.json()
 
 def unlock_machine(token, machine_id):
-    url = 'http://localhost:8080/unlock_machine'
+    url = 'http://host.docker.internal:8080/unlock_machine'
     headers = {
         'Authorization': f'Bearer {token}',
     }
@@ -71,7 +71,7 @@ def unlock_machine(token, machine_id):
     return response.json()
 
 def lock_machine(token, machine_id):
-    url = 'http://localhost:8080/lock_machine'
+    url = 'http://host.docker.internal:8080/lock_machine'
     headers = {
         'Authorization': f'Bearer {token}',
     }
@@ -84,7 +84,7 @@ def lock_machine(token, machine_id):
 
 
 def start_machine(token, machine_id):
-    url = 'http://http://localhost:8080/unlock_machine'
+    url = 'http://host.docker.internal:8080/unlock_machine'
     headers = {
         'machine_id': machine_id,
         'Authorization': f'Bearer {token}'
@@ -97,13 +97,13 @@ def start_machine(token, machine_id):
 def get_machine_and_sessions(token, machine_id):
     try:
 
-        machine_url = f"http://localhost:8080/get_machine?machine_id={machine_id}"
+        machine_url = f"http://host.docker.internal:8080/get_machine?machine_id={machine_id}"
         headers = {'Authorization': f'Bearer {token}'}
         machine_response = requests.get(machine_url, headers=headers)
         machine_data = machine_response.json()
 
 
-        sessions_url = "http://localhost:8080/get_all_sessions"
+        sessions_url = "http://host.docker.internal:8080/get_all_sessions"
         sessions_response = requests.get(sessions_url, headers=headers)
         sessions_data = sessions_response.json()
 
