@@ -1,13 +1,23 @@
+# Используем официальный Python-образ как базовый
 FROM python:3.10.0
 
+# Устанавливаем рабочую директорию
 WORKDIR /app
 
-COPY requirements.txt .
+# Копируем зависимости
+COPY requirements.txt requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Устанавливаем зависимости
+RUN pip install -r requirements.txt
 
-EXPOSE 5000
-
+# Копируем остальной код приложения
 COPY . .
 
-CMD ["python", "app.py"]
+# Определяем переменную окружения для Flask
+ENV FLASK_APP=app.py
+
+# Открываем порт, на котором будет работать приложение
+EXPOSE 5000
+
+# Запускаем приложение
+CMD ["flask", "run", "--host=0.0.0.0"]

@@ -73,7 +73,7 @@ def login():
     if request.method == 'POST':
         phone_number = request.form['phoneNumber']
         password = request.form['password']
-        response = requests.post("http://host.docker.internal:8080/login", json={
+        response = requests.post("http://backend:8080/login", json={
             'phone_number': phone_number,
             'password': password
         })
@@ -150,16 +150,6 @@ def unlock_machine():
         return jsonify({'error': 'Failed to unlock machine'}), 500
 
 
-@app.route('/pause_machine', methods=['POST'])
-def pause_machine():
-    data = request.get_json()
-    machine_id = data.get('machine_id')
-    token = get_token()
-    if not token or not machine_id:
-        return jsonify({'error': 'Invalid request'}), 400
-
-    # Логика для паузы машины
-    result = api.pause_machine(token, machine_id)
 
 
 
@@ -181,11 +171,17 @@ def machine_page(machine_id):
     if not token:
         return redirect(url_for('login'))
 
-    machine_info = api.get_machine_and_sessions(token, machine_id)
+    machine_info = api.get_machine(token, machine_id)
     if machine_info is None:
         return "Ошибка получения данных о машине", 500
 
-    return render_template('machine.html', machine=machine_info['machine'], status=machine_info['status'])
+    # Определяем состояние машины
+    if machine_info['state'] == 0:
+        machine_status = 'Свободна'
+    else:
+        machine_status = 'Используется'
+
+    return render_template('machine.html', machine=machine_info, status=machine_status)
 
 @app.route('/api/machine/<machine_id>')
 def api_machine(machine_id):
@@ -193,13 +189,19 @@ def api_machine(machine_id):
     if not token:
         return jsonify({"error": "Unauthorized"}), 401
 
-    machine_info = api.get_machine_and_sessions(token, machine_id)
+    machine_info = api.get_machine(token, machine_id)
     if machine_info is None:
         return jsonify({"error": "Error fetching machine data"}), 500
 
+    # Определяем состояние машины
+    if machine_info['state'] == 0:
+        machine_status = 'Свободна'
+    else:
+        machine_status = 'Используется'
+
     return jsonify({
-        "machine": machine_info['machine'],
-        "status": machine_info['status']
+        "machine": machine_info,
+        "status": machine_status
     })
 
 if __name__ == '__main__':

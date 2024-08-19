@@ -4,30 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Машины</title>
-    <!-- Подключение Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #e0d6f0; /* Light purple background */
+            color: #4a148c; /* Dark purple text color */
+        }
+        .container {
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 12px; /* Rounded corners for the container */
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+        }
+        table {
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: #ffffff;
+        }
+        table thead th{
+            background-color: #4a148c; /* Dark purple header */
+            color: #ffffff;
+	    border: none; /* White text color */
+        }
+        tbody tr {
+            transition: background-color 0.3s; /* Smooth transition for hover effect */
+        }
+        tbody tr:hover {
+            background-color: #d1c4e9; /* Light purple hover effect */
+        }
+        .btn-primary {
+            background-color: #4a148c; /* Dark purple button */
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #6a1b9a; /* Lighter purple on hover */
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px; /* Reduce padding on smaller screens */
+            }
+            table {
+                font-size: 14px; /* Smaller font size for table on small screens */
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1 class="mb-4">Машины</h1>
-	<a href="/" class="btn btn-primary mb-4">К сессиям</a>
+        <h1 class="mb-4">Warehouse Machines</h1>
+        <a href="/" class="btn btn-primary mb-4">Back to Sessions</a>
         <table id="machine-table" class="table table-striped table-bordered">
-            <thead class="thead-dark">
+            <thead class="thead-light"> <!-- Changed to thead-light for a lighter header -->
                 <tr>
                     <th scope="col">ID</th>
-                    <th scope="col">Состояние</th>
-                    <th scope="col">Зарядка</th>
-                    <th scope="col">Пользователь</th>
-                    <th scope="col">Действия</th>
+                    <th scope="col">State</th>
+                    <th scope="col">Voltage</th>
+                    <th scope="col">User</th>
+                    <th scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <!-- Данные будут загружаться динамически -->
+                <!-- Data will be loaded dynamically -->
             </tbody>
         </table>
     </div>
 
-    <!-- Подключение jQuery и Bootstrap JS -->
+    <!-- Include jQuery and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
@@ -37,7 +79,7 @@
                 type: 'GET',
                 success: function(response) {
                     if (response.error) {
-                        alert('Ошибка: ' + response.error);
+                        alert('Error: ' + response.error);
                         return;
                     }
                     var machineTableBody = $('#machine-table tbody');
@@ -45,13 +87,11 @@
                     response.machines.forEach(function(machine) {
                         var row = '<tr>' +
                             '<td>' + machine.id + '</td>' +
-                            '<td>' + (machine.state == 0 ? 'active' : (machine.state == 1 ? 'paused' : 'finished')) + '</td>' +
+                            '<td>' + (machine.state == 0 ? 'Active' : (machine.state == 1 ? 'Paused' : 'Finished')) + '</td>' +
                             '<td>' + machine.voltage + '</td>' +
                             '<td>' + (machine.user ? machine.user : '') + '</td>' +
                             '<td>' +
-                                '<button class="btn btn-success" onclick="startMachine(\'' + machine.id + '\')">Старт</button>' +
-                                 
-                                '<button class="btn btn-danger" onclick="stopMachine(\'' + machine.id + '\')">Стоп</button>' +
+                                '<button class="btn btn-success" onclick="startMachine(\'' + machine.id + '\')">Start</button>' +
                             '</td>' +
                             '</tr>';
                         machineTableBody.append(row);
@@ -67,14 +107,6 @@
             sendMachineAction('/unlock_machine', machineId);
         }
 
-        function pauseMachine(machineId) {
-            sendMachineAction('/pause_machine', machineId);
-        }
-
-        function stopMachine(machineId) {
-            sendMachineAction('/stop_machine', machineId);
-        }
-
         function sendMachineAction(url, machineId) {
             $.ajax({
                 url: url,
@@ -82,15 +114,18 @@
                 contentType: 'application/json',
                 data: JSON.stringify({ machine_id: machineId }),
                 success: function(response) {
-                    alert('Действие выполнено успешно');
+                    alert('Action completed successfully');
                     updateMachineData();
                 },
-                           });
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
         }
 
         $(document).ready(function() {
             updateMachineData();
-            setInterval(updateMachineData, 3000); 
+            setInterval(updateMachineData, 3000);
         });
     </script>
 </body>

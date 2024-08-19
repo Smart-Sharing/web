@@ -6,36 +6,97 @@
     <title>Машина</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .btn-refresh {
-            margin-top: 20px;
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            margin-top: 50px;
+        }
+        h1 {
+            color: #3e3e3e;
+            margin-bottom: 20px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+        .info-item {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #6c757d;
+        }
+        .info-item span {
+            color: #333;
+            font-weight: 500;
+        }
+        .btn {
+            border-radius: 25px;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .btn-start {
+            background-color: #4caf50; /* Зеленый цвет */
+            border: none;
+            color: #fff;
+        }
+        .btn-start:hover {
+            background-color: #388e3c;
+        }
+        .btn-stop {
+            background-color: #f44336; /* Красный цвет */
+            border: none;
+            color: #fff;
+        }
+        .btn-stop:hover {
+            background-color: #c62828;
+        }
+        .btn-hidden {
+            display: none;
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="mb-4">Информация о машине</h1>
-        <div class="mb-4">
-            <p><strong>ID машины:</strong> <span id="machine-id">{{ machine.id }}</span></p>
-            <p><strong>IP Адрес:</strong> <span id="machine-ipAddr">{{ machine.ipAddr }}</span></p>
-            <p><strong>Напряжение:</strong> <span id="machine-voltage">{{ machine.voltage }}</span></p>
-            <p><strong>Состояние:</strong> <span id="machine-status">{{ status }}</span></p>
+    <div class="container">
+        <h1>Информация о машине</h1>
+        <div class="info-item">
+            <strong>ID машины:</strong> <span id="machine-id">{{ machine.id }}</span>
         </div>
-        <div>
-            <button id="start-btn" class="btn btn-success">Старт</button>
-            <button id="stop-btn" class="btn btn-danger">Стоп</button>
+        <div class="info-item">
+            <strong>IP Адрес:</strong> <span id="machine-ipAddr">{{ machine.ipAddr }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Напряжение:</strong> <span id="machine-voltage">{{ machine.voltage }}</span>
+        </div>
+        <div class="info-item">
+            <strong>Состояние:</strong> <span id="machine-status">{{ status }}</span>
+        </div>
+        <div class="mt-4">
+            <button id="start-btn" class="btn btn-start">Старт</button>
+            <button id="stop-btn" class="btn btn-stop btn-hidden">Стоп</button>
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script>
-        var machineId = '{{ machine.id }}';  
+        var machineId = '{{ machine.id }}';
         function fetchMachineData() {
             $.get(`/api/machine/${machineId}`, function(data) {
-                console.log('Data received:', data);                  $('#machine-ipAddr').text(data.machine.ipAddr);
+                $('#machine-ipAddr').text(data.machine.ipAddr);
                 $('#machine-voltage').text(data.machine.voltage);
                 $('#machine-status').text(data.status);
             }).fail(function(xhr) {
-                console.error('Fetch error:', xhr.responseText);              });
+                console.error('Fetch error:', xhr.responseText);
+            });
         }
 
         $(document).ready(function(){
@@ -44,8 +105,12 @@
                     url: '/unlock_machine',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ machine_id: machineId }),                      success: function(response) {
-                        fetchMachineData();                      },
+                    data: JSON.stringify({ machine_id: machineId }),
+                    success: function(response) {
+                        fetchMachineData();
+                        $('#start-btn').addClass('btn-hidden');
+                        $('#stop-btn').removeClass('btn-hidden');
+                    },
                     error: function(xhr) {
                         console.error('Error:', xhr.responseText);
                     }
@@ -57,8 +122,11 @@
                     url: '/stop_machine',
                     type: 'POST',
                     contentType: 'application/json',
-                    data: JSON.stringify({ machine_id: machineId }),                      success: function(response) {
-                        fetchMachineData();  // Обновляем данные после действия
+                    data: JSON.stringify({ machine_id: machineId }),
+                    success: function(response) {
+                        fetchMachineData();
+                        $('#stop-btn').addClass('btn-hidden');
+                        $('#start-btn').removeClass('btn-hidden');
                     },
                     error: function(xhr) {
                         console.error('Error:', xhr.responseText);
@@ -66,7 +134,7 @@
                 });
             });
 
-            setInterval(fetchMachineData, 3000);  
+            setInterval(fetchMachineData, 3000);
         });
     </script>
 </body>
