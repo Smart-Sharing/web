@@ -10,10 +10,9 @@ services:
     environment:
       FLASK_APP: app.py
       FLASK_ENV: development
-    depends_on:
-      - backend
+    networks:
+      - netw
 
-  backend:
-    image: sharing-web
-    ports:
-      - "8081:8080"
+networks:
+  netw:
+    name: custom_netw

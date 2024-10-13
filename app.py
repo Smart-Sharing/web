@@ -4,6 +4,7 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, m
 import requests
 app = Flask(__name__)
 
+
 def fetch_session_data(token):
     try:
         sessions = api.get_all_sessions(token)
@@ -41,6 +42,7 @@ def fetch_session_data(token):
         print(f'Error fetching session data: {e}')
         return None
 
+
 def fetch_machine_data(token):
     try:
         machines = api.get_all_machines(token)
@@ -65,7 +67,6 @@ def fetch_machine_data(token):
     except Exception as e:
         print(f'Error: {e}')
         return "something went wrong"
-
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -133,7 +134,6 @@ def get_machine_data():
     return jsonify({'machines': machine_data})
 
 
-
 @app.route('/unlock_machine', methods=['POST'])
 def unlock_machine():
     data = request.get_json()
@@ -148,10 +148,7 @@ def unlock_machine():
         return jsonify({'message': 'Machine unlocked successfully'})
     else:
         return jsonify({'error': 'Failed to unlock machine'}), 500
-
-
-
-
+    
 
 @app.route('/stop_machine', methods=['POST'])
 def stop_machine():
@@ -162,7 +159,6 @@ def stop_machine():
         return jsonify({'error': 'Invalid request'}), 400
 
     result = api.lock_machine(token, machine_id)
-
 
 
 @app.route('/machine/<machine_id>')
@@ -182,6 +178,7 @@ def machine_page(machine_id):
         machine_status = 'Используется'
 
     return render_template('machine.html', machine=machine_info, status=machine_status)
+
 
 @app.route('/api/machine/<machine_id>')
 def api_machine(machine_id):
@@ -204,6 +201,6 @@ def api_machine(machine_id):
         "status": machine_status
     })
 
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
-
