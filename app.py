@@ -164,10 +164,8 @@ def machines():
 
 
 # New route to get machine data for each parking (tested)
-@app.route('/parking_machines')
-def parking_machines():
-    data = request.get_json()
-    parking_name = data.get('parking_name')
+@app.route('/parking_machines/<parking_name>')
+def parking_machines(parking_name):
     token = get_token()
     if not token:
         return jsonify({'error': 'Unauthorized'}), 401
@@ -254,6 +252,10 @@ def api_machine(machine_id):
         "machine": machine_info,
         "status": machine_status
     })
+
+
+# New methods for parking places
+
 
 
 if __name__ == '__main__':

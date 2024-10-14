@@ -53,6 +53,8 @@
     <div class="container mt-5">
         <h1 class="mb-4">Warehouse Machines</h1>
         <a href="/" class="btn btn-primary mb-4">Back to Sessions</a>
+        <a href="#" class="btn btn-primary mb-4" data-toggle="modal" data-target="#userModal">Find for parking</a>
+        <button type="button" class="btn btn-primary mb-4" data-dismiss="modal" onclick="resetFinding()">Back to all parkings</button>
         <table id="machine-table" class="table table-striped table-bordered">
             <thead class="thead-light"> <!-- Changed to thead-light for a lighter header -->
                 <tr>
@@ -68,6 +70,29 @@
                 <!-- Data will be loaded dynamically -->
             </tbody>
         </table>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Find machines for parking</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="parkingName">Parking Name</label>
+                        <input type="text" class="form-control" id="parkingName" name="parkingName" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="findForParking()">Find</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Include jQuery and Bootstrap JS -->
@@ -105,6 +130,47 @@
             });
         }
 
+        updateMachineData();
+        var timer = setInterval(updateMachineData, 3000);
+
+        function findForParking() {
+            parking_name = document.getElementById('parkingName').value
+
+            $.ajax({
+                url: '/parking_machines/' + parking_name,
+                type: 'GET',
+                success: function(response) {
+                    if (response.error) {
+                        alert('Error: ' + response.error);
+                        return;
+                    }
+                    var machineTableBody = $('#machine-table tbody');
+                    machineTableBody.empty();
+
+                    if (Array.isArray(response.machines) && response.machines.length !== 0) {
+                        response.machines.forEach(function(machine) {
+                            var row = '<tr>' +
+                                '<td>' + machine.id + '</td>' +
+                                '<td>' + machine.parkingId + '</td>' +
+                                '<td>' + (machine.state == 0 ? 'Active' : (machine.state == 1 ? 'Paused' : 'Finished')) + '</td>' +
+                                '<td>' + machine.voltage + '</td>' +
+                                '<td>' + (machine.user ? machine.user : '') + '</td>' +
+                                '<td>' +
+                                    '<button class="btn btn-success" onclick="startMachine(\'' + machine.id + '\')">Start</button>' +
+                                '</td>' +
+                                '</tr>';
+                            machineTableBody.append(row);
+                        });
+                    }
+
+                    clearInterval(timer);
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+
         function startMachine(machineId) {
             sendMachineAction('/unlock_machine', machineId);
         }
@@ -125,10 +191,9 @@
             });
         }
 
-        $(document).ready(function() {
-            updateMachineData();
-            setInterval(updateMachineData, 3000);
-        });
+        function resetFinding() {
+            timer = setInterval(updateMachineData, 3000);
+        }
     </script>
 </body>
 </html>
