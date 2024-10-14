@@ -1,5 +1,10 @@
 version: '3.8'
 
+# docker exec -it storage psql -U postgres sharing_machines
+# INSERT INTO users (name, phone_number, job_position, password) VALUES ('admin', '89998889988', 'admin', '89998889988');
+# INSERT INTO parkings (name, mac_addr, machines, capacity, state) VALUES ('parking_0', '123', 0, 0, 1);
+# INSERT INTO machines (id, state, parking_id, voltage, ip_addr) VALUES ('machine_1', 0, 0, 12, '123.123.123.123'); *parkings.Machines
+
 services:
   web:
     build: .

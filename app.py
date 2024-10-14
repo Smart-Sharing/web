@@ -22,8 +22,19 @@ def fetch_session_data(token):
             user = users_dict.get(session['workerId'])
             machine = next((m for m in machines if m['id'] == session['machineId']), None)
 
-            datetime_start = datetime.strptime(session['datetimeStart'], '%Y-%m-%dT%H:%M:%SZ')
-            datetime_finish = datetime.strptime(session['datetimeFinish'], '%Y-%m-%dT%H:%M:%SZ')
+            datetime_start = ""
+
+            if "." in session['datetimeStart']:
+                datetime_start = datetime.strptime(session['datetimeStart'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            else:
+                datetime_start = datetime.strptime(session['datetimeStart'], '%Y-%m-%dT%H:%M:%SZ')
+
+            datetime_finish = ""
+
+            if "." in session['datetimeFinish']:
+                datetime_finish = datetime.strptime(session['datetimeFinish'], '%Y-%m-%dT%H:%M:%S.%fZ')
+            else:
+                datetime_finish = datetime.strptime(session['datetimeFinish'], '%Y-%m-%dT%H:%M:%SZ')
 
             session_data.append({
                 'id': session['id'],
@@ -53,7 +64,7 @@ def fetch_machine_data(token):
         for machine in machines:
             try:
                 current_session = next((s for s in sessions if s['machineId'] == machine['id'] and s['state'] == 0), None)
-                user = api.get_user(token, current_session['workerId']) if current_session else None
+                user = api.get_user(current_session['workerId'], token) if current_session else None
 
                 machine_data.append({
                     'id': machine['id'],
