@@ -2,6 +2,7 @@ from datetime import datetime
 import api
 from flask import Flask, render_template, request, redirect, url_for, jsonify, make_response
 import requests
+import pytz # to fix timezones
 app = Flask(__name__)
 
 
@@ -14,6 +15,7 @@ def fetch_session_data(token):
         users = api.get_all_users(token)
         print("Users fetched: ", users)
 
+        MSK = pytz.timezone('Europe/Moscow') # local timezone
 
         users_dict = {user['id']: user for user in users}
 
@@ -44,8 +46,8 @@ def fetch_session_data(token):
                 'name': user['name'] if user else None,
                 'phoneNumber': user['phoneNumber'] if user else None,
                 'jobPosition': user['jobPosition'] if user else None,
-                'datetimeStart': datetime_start.strftime('%Y-%m-%d %H:%M:%S'),
-                'datetimeFinish': datetime_finish.strftime('%Y-%m-%d %H:%M:%S')
+                'datetimeStart': datetime_start.astimezone(MSK).strftime('%Y-%m-%d %H:%M:%S'),
+                'datetimeFinish': datetime_finish.astimezone(MSK).strftime('%Y-%m-%d %H:%M:%S')
             })
         print("Processed session data: ", session_data)
         return session_data
@@ -58,7 +60,6 @@ def fetch_machine_data(token):
     try:
         machines = api.get_all_machines(token)
         sessions = api.get_all_sessions(token)
-        users = api.get_all_users(token)
 
         machine_data = []
         for machine in machines:
@@ -68,6 +69,34 @@ def fetch_machine_data(token):
 
                 machine_data.append({
                     'id': machine['id'],
+                    'parkingId': machine['parking_id'],
+                    'state': machine['state'],
+                    'voltage': machine['voltage'],
+                    'user': user['name'] if user else None
+                })
+            except Exception as e:
+                print(f'Error processing machine {machine["id"]}: {e}')
+        return machine_data
+    except Exception as e:
+        print(f'Error: {e}')
+        return "something went wrong"
+    
+
+# New method to fetch machine data for each parking
+def fetch_parking_machines_data(token, parking_name):
+    try:
+        machines = api.get_parking_machines(token, parking_name)
+        sessions = api.get_all_sessions(token)
+
+        machine_data = []
+        for machine in machines:
+            try:
+                current_session = next((s for s in sessions if s['machineId'] == machine['id'] and s['state'] == 0), None)
+                user = api.get_user(current_session['workerId'], token) if current_session else None
+
+                machine_data.append({
+                    'id': machine['id'],
+                    'parkingId': machine['parking_id'],
                     'state': machine['state'],
                     'voltage': machine['voltage'],
                     'user': user['name'] if user else None
@@ -132,6 +161,20 @@ def machines():
     if not token:
         return redirect(url_for('login'))
     return render_template('machines.html')
+
+
+# New route to get machine data for each parking (tested)
+@app.route('/parking_machines')
+def parking_machines():
+    data = request.get_json()
+    parking_name = data.get('parking_name')
+    token = get_token()
+    if not token:
+        return jsonify({'error': 'Unauthorized'}), 401
+    machine_data = fetch_parking_machines_data(token, parking_name)
+    if machine_data is None:
+        return jsonify({'error': 'Unauthorized'}), 401
+    return jsonify({'machines': machine_data})
 
 
 @app.route('/get_machine_data')

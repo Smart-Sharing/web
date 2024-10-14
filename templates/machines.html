@@ -57,6 +57,7 @@
             <thead class="thead-light"> <!-- Changed to thead-light for a lighter header -->
                 <tr>
                     <th scope="col">ID</th>
+                    <th scope="col">Parking ID</th>
                     <th scope="col">State</th>
                     <th scope="col">Voltage</th>
                     <th scope="col">User</th>
@@ -87,6 +88,7 @@
                     response.machines.forEach(function(machine) {
                         var row = '<tr>' +
                             '<td>' + machine.id + '</td>' +
+                            '<td>' + machine.parkingId + '</td>' +
                             '<td>' + (machine.state == 0 ? 'Active' : (machine.state == 1 ? 'Paused' : 'Finished')) + '</td>' +
                             '<td>' + machine.voltage + '</td>' +
                             '<td>' + (machine.user ? machine.user : '') + '</td>' +
