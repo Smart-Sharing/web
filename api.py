@@ -128,16 +128,19 @@ def get_parking(token, parking_id):
     return json_response
 
 
-def register_parking(token, name, mac_addr, capacity, state):
+def register_parking(token, name, mac_addr, capacity):
     url = 'http://backend:8080/register_parking'
     headers = {
         'Authorization': f'Bearer {token}',
     }
+
+    if not capacity:
+        capacity = 0
+
     payload = {
         'name': name,
         'mac_addr': mac_addr,
-        'capacity': capacity,
-        'state': state,
+        'capacity': int(capacity),
     }
     response = requests.request("POST", url, headers=headers, data=json.dumps(payload))
     print(response.text)
@@ -150,8 +153,8 @@ def update_parking_state(token, parking_id, newState):
         'Authorization': f'Bearer {token}',
     }
     payload = {
-        'id': parking_id,
-        'state': newState,
+        'id': int(parking_id),
+        'state': int(newState),
     }
     response = requests.request("PUT", url, headers=headers, data=json.dumps(payload))
     print(response.text)
@@ -164,8 +167,8 @@ def update_parking_capacity(token, parking_id, newCapacity):
         'Authorization': f'Bearer {token}',
     }
     payload = {
-        'id': parking_id,
-        'capacity': newCapacity,
+        'id': int(parking_id),
+        'capacity': int(newCapacity),
     }
     response = requests.request("PUT", url, headers=headers, data=json.dumps(payload))
     print(response.text)
@@ -179,7 +182,7 @@ def manualy_add_machine(token, parking_id, machine_id):
     }
     payload = {
         'machine_id': machine_id,
-        'parking_id': parking_id,
+        'parking_id': int(parking_id),
     }
     response = requests.request("PUT", url, headers=headers, data=json.dumps(payload))
     print(response.text)

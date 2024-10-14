@@ -211,6 +211,10 @@ def stop_machine():
         return jsonify({'error': 'Invalid request'}), 400
 
     result = api.lock_machine(token, machine_id)
+    if result.get('status'):
+        return jsonify({'message': 'Machine unlocked successfully'})
+    else:
+        return jsonify({'error': 'Failed to unlock machine'}), 500
 
 
 @app.route('/machine/<machine_id>')
@@ -255,7 +259,60 @@ def api_machine(machine_id):
 
 
 # New methods for parking places
+# (tested)
+@app.route('/parkings')
+def parkings():
+    token = get_token()
+    if not token:
+        return redirect(url_for('login'))
+    return render_template('parkings.html')
 
+# (tested)
+@app.route('/get_parkings_data')
+def get_parkings_data():
+    token = get_token()
+    if not token:
+        return jsonify({'error': 'Unauthorized'}), 401
+    parkings_data = api.get_all_parkings(token)
+    print(parkings_data)
+    if parkings_data == "Something went wrong":
+        return jsonify({'error': 'Internal Server Error'}), 500
+    return jsonify({'parkings': parkings_data})
+
+
+# (tested)
+@app.route('/add_machine', methods=['POST'])
+def add_machine():
+    data = request.get_json()
+    machine_id = data.get('machine_id')
+    parking_id = data.get('parking_id')
+    token = get_token()
+    if not token or not machine_id or not parking_id:
+        return jsonify({'error': 'Invalid request'}), 400
+
+    result = api.manualy_add_machine(token, parking_id, machine_id)
+    if result.get('status'):
+        return jsonify({'message': 'Machine unlocked successfully'})
+    else:
+        return jsonify({'error': 'Failed to unlock machine'}), 500
+
+
+# (tested)
+@app.route('/register_parking', methods=['POST'])
+def register_parking():
+    data = request.get_json()
+    name = data.get('name')
+    mac_addr = data.get('mac_addr')
+    capacity = data.get('capacity')
+    token = get_token()
+    if not token or not name or not mac_addr:
+        return jsonify({'error': 'Invalid request'}), 400
+
+    result = api.register_parking(token, name, mac_addr, capacity)
+    if result.get('status'):
+        return jsonify({'message': 'Machine unlocked successfully'})
+    else:
+        return jsonify({'error': 'Failed to unlock machine'}), 500
 
 
 if __name__ == '__main__':
