@@ -315,5 +315,39 @@ def register_parking():
         return jsonify({'error': 'Failed to unlock machine'}), 500
 
 
+# (tested)
+@app.route('/update_parking_state', methods=['POST'])
+def update_parking_state():
+    data = request.get_json()
+    parking_id = data.get('parking_id')
+    state = data.get('state')
+    token = get_token()
+    if not token or not parking_id or not state:
+        return jsonify({'error': 'Invalid request'}), 400
+
+    result = api.update_parking_state(token, parking_id, state)
+    if result.get('status'):
+        return jsonify({'message': 'Machine unlocked successfully'})
+    else:
+        return jsonify({'error': 'Failed to unlock machine'}), 500
+
+
+#
+@app.route('/update_parking_capacity', methods=['POST'])
+def update_parking_capacity():
+    data = request.get_json()
+    parking_id = data.get('parking_id')
+    capacity = data.get('capacity')
+    token = get_token()
+    if not token or not parking_id:
+        return jsonify({'error': 'Invalid request'}), 400
+
+    result = api.update_parking_capacity(token, parking_id, capacity)
+    if result.get('status'):
+        return jsonify({'message': 'Machine unlocked successfully'})
+    else:
+        return jsonify({'error': 'Failed to unlock machine'}), 500
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

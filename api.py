@@ -161,14 +161,18 @@ def update_parking_state(token, parking_id, newState):
     return response.json()
 
 
-def update_parking_capacity(token, parking_id, newCapacity):
-    url = 'http://backend:8080/update_parking_state'
+def update_parking_capacity(token, parking_id, capacity):
+    url = 'http://backend:8080/update_parking_capacity'
     headers = {
         'Authorization': f'Bearer {token}',
     }
+
+    if not capacity:
+        capacity = 0
+
     payload = {
         'id': int(parking_id),
-        'capacity': int(newCapacity),
+        'capacity': int(capacity),
     }
     response = requests.request("PUT", url, headers=headers, data=json.dumps(payload))
     print(response.text)

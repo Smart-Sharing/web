@@ -56,6 +56,7 @@
         <a href="/machines" class="btn btn-primary mb-4">Back to Machines</a>
         <a href="#" class="btn btn-primary mb-4" data-toggle="modal" data-target="#machineModal">Add machine to parking</a>
         <a href="#" class="btn btn-primary mb-4" data-toggle="modal" data-target="#parkingModal">Register Parking</a>
+        <a href="#" class="btn btn-primary mb-4" data-toggle="modal" data-target="#parkingUpdateModal">Update Parking capacity</a>
         <table id="parkings-table" class="table table-striped table-bordered">
             <thead class="thead-light"> <!-- Changed to thead-light for a lighter header -->
                 <tr>
@@ -132,6 +133,33 @@
         </div>
     </div>
 
+    <!-- Модальное окно -->
+    <div class="modal fade" id="parkingUpdateModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Update parking capacity</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="parkingUpdateId">Parking ID</label>
+                        <input type="text" class="form-control" id="parkingUpdateId" name="parkingUpdateId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="parkingUpdateCapacity">Capacity (if empty or "0" - Unlimited)</label>
+                        <input type="text" class="form-control" id="parkingUpdateCapacity" name="parkingUpdateCapacity" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="updateCapacity()">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Include jQuery and Bootstrap JS -->
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
@@ -154,8 +182,10 @@
                             '<td>' + parking.mac_addr + '</td>' +
                             '<td>' + parking.machines + '</td>' +
                             '<td>' + (parking.capacity == 0 ? 'Unlimited' : parking.capacity) + '</td>' +
-                            '<td>' + parking.state + '</td>' +
-                            '<td>' + 'add_actions' + '</td>' +
+                            '<td>' + (parking.state == 1 ? 'Active' : 'Inactive') + '</td>' +
+                           '<td>' +
+                                '<button class="btn btn-warning" onclick="updateParkingState(\''+ parking.id +'\',\''+ (parking.state == 0 ? '1' : '0') +'\')">Switch state</button>' +
+                            '</td>' +
                             '</tr>';
                         parkingsTableBody.append(row);
                     });
@@ -209,6 +239,49 @@
                     }
 
                     console.info('Add new parking (name, mac_addr)', parking_name, mac_addr)
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+
+        function updateParkingState(parking_id, state) {
+            $.ajax({
+                url: '/update_parking_state',
+                type: 'POST',
+                data: JSON.stringify({parking_id: parking_id, state: state}),
+                contentType: "application/json",
+                success: function(response) {
+                    if (response.error) {
+                        alert('Error: ' + response.error);
+                        return;
+                    }
+
+                    console.info('Change state (parking_id, newState)', parking_id, state)
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+
+        function updateCapacity() {
+            parking_id = document.getElementById('parkingUpdateId').value
+            capacity = document.getElementById('parkingUpdateCapacity').value
+
+            $.ajax({
+                url: '/update_parking_capacity',
+                type: 'POST',
+                data: JSON.stringify({parking_id: parking_id, capacity: capacity}),
+                contentType: "application/json",
+                success: function(response) {
+                    if (response.error) {
+                        alert('Error: ' + response.error);
+                        return;
+                    }
+
+                    console.info('Change capacity (parking_id, capacity)', parking_id, capacity)
                 },
                 error: function(xhr, status, error) {
                     console.error('AJAX Error:', status, error);
