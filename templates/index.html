@@ -60,13 +60,19 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .indicator-green {
+            border-radius: 5px;
             background-color: #28a745;
+            color: #28a745;
         }
         .indicator-red {
+            border-radius: 5px;
             background-color: #dc3545;
+            color: #dc3545;
         }
         .indicator-black {
+            border-radius: 5px;
             background-color: #343a40;
+            color: #343a40;
         }
         .modal-header {
             background-color: #6f42c1;
@@ -149,13 +155,13 @@
                         var stateIndicator;
                         switch (session.state) {
                             case 0:
-                                stateIndicator = '<span class="indicator-red"></span>';
+                                stateIndicator = '<span class="indicator-red">.....</span>';
                                 break;
                             case 1:
-                                stateIndicator = '<span class="indicator-green"></span>';
+                                stateIndicator = '<span class="indicator-green">.....</span>';
                                 break;
                             default:
-                                stateIndicator = '<span class="indicator-black"></span>';
+                                stateIndicator = '<span class="indicator-black">.....</span>';
                         }
 
                         var statusText;

@@ -292,9 +292,9 @@ def add_machine():
 
     result = api.manualy_add_machine(token, parking_id, machine_id)
     if result.get('status'):
-        return jsonify({'message': 'Machine unlocked successfully'})
+        return jsonify({'message': 'Machine added successfully'})
     else:
-        return jsonify({'error': 'Failed to unlock machine'}), 500
+        return jsonify({'error': 'Failed to add machine'}), 500
 
 
 # (tested)
@@ -310,9 +310,9 @@ def register_parking():
 
     result = api.register_parking(token, name, mac_addr, capacity)
     if result.get('status'):
-        return jsonify({'message': 'Machine unlocked successfully'})
+        return jsonify({'message': 'Parking registered successfully'})
     else:
-        return jsonify({'error': 'Failed to unlock machine'}), 500
+        return jsonify({'error': 'Failed to register new parking'}), 500
 
 
 # (tested)
@@ -327,12 +327,12 @@ def update_parking_state():
 
     result = api.update_parking_state(token, parking_id, state)
     if result.get('status'):
-        return jsonify({'message': 'Machine unlocked successfully'})
+        return jsonify({'message': 'Parking state updated successfully'})
     else:
-        return jsonify({'error': 'Failed to unlock machine'}), 500
+        return jsonify({'error': 'Failed to update parking state'}), 500
 
 
-#
+# (tested)
 @app.route('/update_parking_capacity', methods=['POST'])
 def update_parking_capacity():
     data = request.get_json()
@@ -344,9 +344,9 @@ def update_parking_capacity():
 
     result = api.update_parking_capacity(token, parking_id, capacity)
     if result.get('status'):
-        return jsonify({'message': 'Machine unlocked successfully'})
+        return jsonify({'message': 'Parking capacity updated successfully'})
     else:
-        return jsonify({'error': 'Failed to unlock machine'}), 500
+        return jsonify({'error': 'Failed update parking capacity'}), 500
 
 
 if __name__ == '__main__':

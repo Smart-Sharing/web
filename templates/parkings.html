@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Машины</title>
+    <title>Parkings</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
@@ -46,6 +46,25 @@
             table {
                 font-size: 14px; /* Smaller font size for table on small screens */
             }
+        }
+
+        /* parking indicator colors */
+        .indicator-green {
+            border-radius: 5px;
+            text-align: center;
+            background-color: #009e25;
+            color: white;
+        }
+        .indicator-yellow {
+            border-radius: 5px;
+            text-align: center;
+            background-color: #ffe341;
+        }
+        .indicator-red {
+            border-radius: 5px;
+            text-align: center;
+            background-color: #ce0015;
+            color: white;
         }
     </style>
 </head>
@@ -180,7 +199,7 @@
                             '<td>' + parking.id + '</td>' +
                             '<td>' + parking.name + '</td>' +
                             '<td>' + parking.mac_addr + '</td>' +
-                            '<td>' + parking.machines + '</td>' +
+                            '<td><div class=\''+ setColor(parking.capacity, parking.machines) +'\'>' + parking.machines + '</div></td>' +
                             '<td>' + (parking.capacity == 0 ? 'Unlimited' : parking.capacity) + '</td>' +
                             '<td>' + (parking.state == 1 ? 'Active' : 'Inactive') + '</td>' +
                            '<td>' +
@@ -288,6 +307,24 @@
                 }
             });
         }
+
+        function setColor(capacity, machines) {
+            if (capacity === 0) {
+                return "indicator-green"
+            }
+
+            var ratio = (machines/capacity) * 100
+
+            if (ratio <= 50) {
+                return "indicator-green"
+            }
+
+            if (50 < ratio && ratio <= 75 ) {
+                return "indicator-yellow"
+            }
+
+            return "indicator-red"
+        } 
     </script>
 </body>
 </html>
