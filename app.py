@@ -349,5 +349,28 @@ def update_parking_capacity():
         return jsonify({'error': 'Failed update parking capacity'}), 500
 
 
+# New methods to work with qr-codes and parking zone
+# (tested)
+@app.route('/parking/<parking_name>')
+def parking(parking_name):
+    token = get_token()
+    if not token:
+        return redirect(url_for('login'))
+    return render_template('parking.html', name=parking_name)
+
+
+# (tested)
+@app.route('/get_qr_key')
+def get_qr_key():
+    token = get_token()
+    if not token:
+        return jsonify({'error': 'Unauthorized'}), 401
+    data = api.get_qr_key(token)
+    print(data)
+    if data == "Something went wrong":
+        return jsonify({'error': 'Internal Server Error'}), 500
+    return jsonify({'qr_key': data['qr_key'], 'local_ip': data['local_ip']})
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)

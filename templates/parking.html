@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parking</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #e0d6f0; /* Light purple background */
+            color: black; /* Dark purple text color */
+        }
+        .container {
+            background-color: #ffffff; /* White background for the container */
+            border-radius: 12px; /* Rounded corners for the container */
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2); /* Shadow for depth */
+        }
+        .btn-primary {
+            font-size: 30px;
+            width: 300px;
+            background-color: #27a700; /* Dark green button */
+            border: none;
+        }
+        .btn-primary:hover {
+            background-color: #07d100; /* Lighter green on hover */
+        }
+        @media (max-width: 576px) {
+            .container {
+                padding: 10px; /* Reduce padding on smaller screens */
+            }
+            table {
+                font-size: 14px; /* Smaller font size for table on small screens */
+            }
+        }
+        #qrContainer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 90%;
+        }
+        h1 {
+            font-size: 50px;
+        }
+        h5 {
+            font-size: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-5" id="name">{{ name }}</h1>
+        <a class="btn btn-primary mb-4 p-2" data-toggle="modal" data-target="#userModal" onclick="getParkingQr()">Завершить сессию</a>
+    </div>
+
+    <!-- Модальное окно -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Отсканируйте QR-код чтобы завершить сессию</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body" style="align-items: center; justify-self: center;">
+                    <div id="qrContainer">
+                        <div id="qrCode"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-lg" data-dismiss="modal">Закрыть окно</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include jQuery and Bootstrap JS and javaScriptQrGenerator-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function getParkingQr() {
+            name = document.getElementById('name').textContent
+
+            $.ajax({
+                url: '/get_qr_key',
+                type: 'GET',
+                success: function(response) {
+                    if (response.error) {
+                        alert('Error: ' + response.error);
+                        return;
+                    }
+
+                    var parkingQrContainer= $('#qrContainer');
+                    parkingQrContainer.empty();
+                    parkingQrContainer.append('<div id="qrCode"></div>')
+
+                    href = 'http://' + response.local_ip + ':3000/finish_session?parking_name=' + name + '&key=' + response.qr_key
+                    
+                    generateQrCode(href, 256)
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX Error:', status, error);
+                }
+            });
+        }
+
+        function generateQrCode(href, width) {
+            return new QRCode("qrCode", {
+                text: href,
+                width: width,
+                height: width,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H,
+            });
+        }
+    </script>
+</body>
+</html>

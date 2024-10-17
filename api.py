@@ -191,3 +191,12 @@ def manualy_add_machine(token, parking_id, machine_id):
     response = requests.request("PUT", url, headers=headers, data=json.dumps(payload))
     print(response.text)
     return response.json()
+
+# New method to work with qr-codes
+def get_qr_key(token):
+    url = "http://backend:8080/get_qr_key"
+    headers = {'Authorization': f'Bearer {token}'}
+    response = requests.get(url, headers=headers)
+    print(response)
+    json_response = response.json()
+    return json_response
